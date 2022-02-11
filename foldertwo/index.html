@@ -1,0 +1,104 @@
+<h1>Space object list</h1>
+
+<div class="error" style="color: red;"></div>
+
+<ul class="objects">
+    
+</ul>
+
+<form name="planet" class='planet-form'>
+    <div>Satellites</div>
+    <br/>
+    <label>Gas giant</label>
+    <input type="radio" name="so-type[]" value='gas giant' />
+    <label>Normal planet</label>
+    <input type="radio" name="so-type[]" value='earthlike' />
+    <label>Satellite</label>
+    <input type="radio" name="so-type[]" value='satellite' />
+    <label>Star</label>
+    <input type="radio" name="so-type[]" value='star' />
+    <hr/>
+    <input type="text" name="so-title" class="so-title" placeholder="Space obejct title" />
+    <hr/>
+    <input type="text" name="so-size" class="so-size" placeholder="Space object size" />
+    <hr/>
+    <input type="text" name="so-no-satellites" class="so-no-satellites" placeholder="Number of satellites" />
+    <hr/>
+    <button class="submit">SAVE!!!</button>
+</form>
+
+<style type="text/css">
+    .obj-type {
+        text-transform: capitalize;
+    }
+
+    .objects, form {
+        width: 50%;
+        float: left;
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script>
+    jQuery(document).ready(function() {
+        $.ajax({ // AJAX заявка за взимаене на началните данни от бекенда.
+            type: 'GET',
+            url: 'get.php',
+            dataType: "JSON", // data type expected from server
+            success: function (data) { // Обработваща функция след успешен отговор.
+                if(data.status === 'error') { // Обработка на грешката.
+                    $(".error").append("<h1>" + data.mesage + "</h1>");
+                }
+                else {
+                    for(var i = 0; i < data.data.length; i++) {
+                        constructSpaceData(data.data[i]); // Добавяне на получените космически обекти.
+                    }
+                }
+            }
+        });
+
+        $(".submit").click(function (event) { // Обработка нака на  click събитието на бутона .submit
+            event.preventDefault(); // Предпазване от обработката по подразбиране.
+
+            var postData = { // Конструиране на данните за POST масива.
+                'key': '0987654321',
+                'title': $(".so-title").val(),
+                'type': $("[name='so-type[]']:checked").val(),
+                'size': $(".so-size").val(),
+                'satellites': $(".so-no-satellites").val()
+            };
+
+            $.ajax({ // AJAX заявка за добавяне на космически обект.
+                type: 'POST',
+                url: 'post.php',
+                dataType: "JSON", // data type expected from server
+                data: postData,
+                success: function (data) { // Обработваща функция след успешен отговор.
+                    if(data.status === 'error') { // Обработка на грешката.
+                        $(".error").append("<h1>" + data.mesage + "</h1>");
+                    }
+                    else {
+                        constructSpaceData(data.data); // Добавяне на нововъведеният космически обект.
+                    }
+                },
+                error: function (data) { // Обработваща функция за неуспешен отговор.
+                    $(".error").append("<h1>" + data.mesage + "</h1>");
+                }
+            });
+        });
+
+        /**
+         Конструира DOM за космически обект и го добавя в списъка.
+         */
+        function constructSpaceData(item) {
+            var title = "<h1>Title: " + item.title + "</h1>";
+            var size = "<p>Size: " + item.size + " km</p>";
+            var type = "<p>Type: <span class='obj-type'>" + item.type + "<span></p>";
+            var satellites = "<p>Has  " + item.satellites + " satellites</p>";
+
+            $(".objects").append("<li>" + title + size + type + satellites + "</li>");
+        }
+    });
+</script>

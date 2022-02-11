@@ -1,0 +1,65 @@
+<h1 class="heading">Processing ...</h1>
+
+<div class="error"></div>
+
+<div class="planet"></div>
+
+<style type="text/css">
+    .planet{
+        width: 500px;
+        height: 500px;
+        border: dashed rgb(255, 150, 89) 3px;
+        padding: 20px;
+    }
+
+    .error {
+        color: red;
+    }
+</style>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script>
+    jQuery(document).ready(function() {
+        $.ajax({
+            type: 'GET',
+            url: './index.php',
+            dataType: "JSON", // data type expected from server
+            success: function (data) {
+                constructSpaceData(data);
+            },
+            error: function(data) {
+                console.log('Error: ' + data);
+
+                $(".error").append("<h1>Error! Try refreshing.</h1>");
+            }
+        });
+
+        /*
+        
+        Shorthand GET declaration.
+        
+        $.get(
+            './index.php',     // URL to query
+            '',                 // Data parameter for the URL
+            function(data) {    // Success handler function
+                constructSpaceData(data);
+            }
+        );*/
+
+        function constructSpaceData(data) {
+            var spaceObject = data.spaceObject;
+            var size = data.size;
+            var satellites = data.satellites;
+
+            $(".planet")
+                .append("<h1>" + spaceObject.type + ": " + spaceObject.name + "</h1>")
+                .append("<h2>Size: " + size.value + size.measure + "</h2>")
+                .append("<p>The "+ spaceObject.name +" has " + satellites.length + " satelites</p>");
+
+            for(var i = 0; i < satellites.length; i++ ) {
+                var sat = satellites[i];
+                $(".planet").append("<h2>" + sat.name + " which is " + sat.type + "</h2>");
+            }
+        }
+    });
+</script>
